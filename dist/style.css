@@ -40,3 +40,14 @@ header{right:38px;display:flex;align-items:center;justify-content:space-between;
 
 footer>a{pointer-events:auto;color:inherit;text-decoration:none}footer>a:hover{text-decoration:underline}#visit-link{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 
+
+/* Useful, crawlable context follows the full-screen generator. */
+.site-guide{max-width:760px;margin:0 auto;padding:56px 28px 80px;line-height:1.75;font-size:16px;color:#525647;border-top:1px solid #dfdfd2}
+.site-guide h1{font-size:clamp(24px,4vw,32px);line-height:1.25;font-weight:600;letter-spacing:-.6px;margin:0 0 22px}
+.site-guide h2{font-size:21px;line-height:1.4;margin:32px 0 12px;font-weight:600}
+.site-guide ol{padding-left:24px}.site-guide li{padding:4px 0 4px 4px}
+.site-guide details{border-bottom:1px solid #dfdfd2;padding:15px 0}.site-guide summary{cursor:pointer;font-weight:500}.site-guide details p{margin:12px 0 0}.site-guide a{color:#405d47}
+.shared-view .site-guide{display:none}
+body:has(.site-guide)>footer{top:calc(max(100svh,650px) - 44px);bottom:auto}
+dialog h2{font-size:24px;font-weight:500}
+@media(max-width:600px){body:has(.site-guide)>footer{top:calc(max(100svh,600px) - 44px)}.site-guide{padding:40px 24px 60px}}
