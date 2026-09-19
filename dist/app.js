@@ -217,7 +217,17 @@ function update(){clearTimeout(timer);let next=input.value.trim();try{if(!/^http
 input.oninput=()=>{clearTimeout(timer);timer=setTimeout(update,650);};$('#link-form').onsubmit=e=>{e.preventDefault();update();input.blur();};
 function setSeason(){document.querySelectorAll('[data-season]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.season)===season)));$('#swatches').hidden=false;$('#custom-color').value=season===4?blossom:$('#custom-color').value;$('.custom-swatch').classList.toggle('selected',season===4);document.querySelectorAll('[data-palette]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.palette)===season)));if(renderer)resize();}
 document.querySelectorAll('[data-season]').forEach(b=>b.onclick=()=>{season=Number(b.dataset.season);setSeason();grow();});document.querySelectorAll('[data-color]').forEach(b=>b.onclick=()=>{blossom=b.dataset.color;season=Number(b.dataset.palette||0);setSeason();grow();});setSeason();
-$('#custom-color').onchange=e=>{blossom=e.target.value;season=4;setSeason();grow();};
+let colorFrame=0;
+function applyCustomColor(hex){blossom=hex;season=4;setSeason();if(!colorFrame)colorFrame=requestAnimationFrame(()=>{colorFrame=0;if(bonsai)bonsai.setColor(blossom);});}
+function syncColorPanel(hex){const hsl={};new THREE.Color(hex).getHSL(hsl,THREE.SRGBColorSpace);$('#color-hue').value=Math.round(hsl.h*360);$('#color-saturation').value=Math.round(hsl.s*100);$('#color-lightness').value=Math.round(hsl.l*100);$('#custom-color').value=hex;paintColorPanel();}
+function paintColorPanel(){const h=$('#color-hue').value,s=$('#color-saturation').value,l=$('#color-lightness').value;$('#color-preview').style.background=`hsl(${h} ${s}% ${l}%)`;$('#color-saturation').style.background=`linear-gradient(to right,hsl(${h} 0% 50%),hsl(${h} 100% 50%))`;$('#color-lightness').style.background=`linear-gradient(to right,#000,hsl(${h} ${s}% 50%),#fff)`;}
+function closeColorPanel(){$('#color-panel').hidden=true;$('#open-color').setAttribute('aria-expanded','false');}
+$('#open-color').onclick=()=>{const open=$('#color-panel').hidden;$('#color-panel').hidden=!open;$('#open-color').setAttribute('aria-expanded',String(open));if(open){$('#share-menu').hidden=true;syncColorPanel(season===4?blossom:$('#custom-color').value);}};
+$('#close-color').onclick=()=>{closeColorPanel();$('#open-color').focus();};
+for(const id of ['#color-hue','#color-saturation','#color-lightness'])$(id).oninput=()=>{const c=new THREE.Color().setStyle(`hsl(${$('#color-hue').value},${$('#color-saturation').value}%,${$('#color-lightness').value}%)`);const hex='#'+c.getHexString();$('#custom-color').value=hex;paintColorPanel();applyCustomColor(hex);};
+$('#custom-color').oninput=e=>{if(/^#[0-9a-f]{6}$/i.test(e.target.value)){syncColorPanel(e.target.value);applyCustomColor(e.target.value);}};
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('#color-panel')&&!e.target.closest('#open-color'))closeColorPanel();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeColorPanel();});
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),3000);}
 function bonsaiLink(){
  const u=new URL('https://magic-tree-jv.jvoyles255.chatgpt.site/');

@@ -75,7 +75,12 @@ export function buildBonsai(qr,season,blossom){
  const fallingMaterial=new THREE.MeshBasicMaterial({color:season===3?'#e4eceb':palette[1],side:THREE.DoubleSide,transparent:true});
  const falling=new THREE.InstancedMesh(leafGeo.clone(),fallingMaterial,24),drifters=Array.from({length:24},()=>({origin:leafParts[Math.floor(random()*leafParts.length)],phase:random(),speed:.045+random()*.035,spin:random()*6.28}));falling.frustumCulled=false;group.add(falling);
  const color=new THREE.Color();let previous=-1,lastTime=null,time=0;
- return {group,pieces,falling,update(p,t=0,reduced=false){
+ return {group,pieces,falling,setColor(hex){
+  const base=new THREE.Color(hex),shades=[.68,.84,1,1.12].map(f=>base.clone().multiplyScalar(f));
+  for(let i=0;i<fine.count;i++)fine.setColorAt(i,shades[i%4]);fine.instanceColor.needsUpdate=true;
+  pieces.forEach((v,i)=>{if(!v.canopy)return;v.color.copy(shades[i%4]);const hsl={};v.color.getHSL(hsl);v.scan.setHSL(hsl.h,Math.max(.25,hsl.s),Math.min(.10,hsl.l));});
+  fallingMaterial.color.copy(shades[1]);previous=-1;
+ },update(p,t=0,reduced=false){
   const dt=lastTime===null?0:Math.min(.05,Math.max(0,(t-lastTime)/1000));lastTime=t;if(!reduced&&p===0)time+=dt;
   falling.visible=!reduced&&p<.5;fallingMaterial.opacity=1-THREE.MathUtils.smoothstep(p,0,.5);
   if(falling.visible){drifters.forEach((v,i)=>{const cycle=(time*v.speed+v.phase)%1,origin=v.origin;dummy.position.set(origin.x+Math.sin(cycle*7+v.spin)*.18+cycle*.2,origin.y*(1-cycle)+.02,origin.z+Math.cos(cycle*5+v.spin)*.16);dummy.rotation.set(cycle*8+v.spin,cycle*6,Math.sin(cycle*10)*.6);const size=.07*Math.min(1,cycle*15,(1-cycle)*15);dummy.scale.set(size,season===3?.2:.5,size*1.5);dummy.updateMatrix();falling.setMatrixAt(i,dummy.matrix);});falling.instanceMatrix.needsUpdate=true;}
