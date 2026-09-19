@@ -5,7 +5,7 @@ export function buildBonsai(qr,season,blossom){
  const group=new THREE.Group(),wood=new THREE.Group();group.add(wood);
  const n=qr.getModuleCount(),unit=5.6/(n+8),dummy=new THREE.Object3D(),pieces=[];
  let seed=42;const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
- const palette=season===0?[blossom,'#dfa6cd','#efc9e5','#c98fbd']:season===1?['#599333','#73a746','#8ab954','#497f32']:season===2?['#bf7132','#dda345','#a64f2f','#d48a36']:['#8ac9e7','#b3e0f3','#72b2d2','#d0ecf7'];
+ const palette=season===4?[.68,.84,1,1.12].map(f=>{const c=new THREE.Color(blossom);c.multiplyScalar(f);return c.getStyle();}):season===0?[blossom,'#dfa6cd','#efc9e5','#c98fbd']:season===1?['#599333','#73a746','#8ab954','#497f32']:season===2?['#bf7132','#dda345','#a64f2f','#d48a36']:['#8ac9e7','#b3e0f3','#72b2d2','#d0ecf7'];
  const material=color=>new THREE.MeshStandardMaterial({color,roughness:1,transparent:true});
  const voxels=new Map(),step=.065;
  const barkColors=['#65432f','#765039','#895b3b','#986944','#543b2d'];

@@ -28,3 +28,5 @@ header{right:38px;display:flex;align-items:center;justify-content:space-between;
 @media(max-width:380px){.shared-view .controls{width:calc(100% - 24px);column-gap:6px}.shared-view #visitor-actions{gap:6px}.shared-view #visitor-actions a{font-size:12px;padding:10px 5px}}
 
 .brand-logo{width:39px;height:39px;flex-shrink:0;color:#52745a}.brand{gap:10px;letter-spacing:-.65px;font-weight:650}.brand>span:last-child{display:inline}
+
+.custom-swatch{position:relative;display:grid;place-items:center;width:25px;height:25px;border:3px solid #f6f1e7;border-radius:50%;outline:1px solid #cbcbbb;background:conic-gradient(#e8a4b7,#dfba67,#77a971,#83c5df,#a58bcd,#e8a4b7);cursor:pointer}.custom-swatch span{color:#fff;font-weight:700;text-shadow:0 1px 3px #334433}.custom-swatch.selected{outline:2px solid #52745a;transform:scale(1.12)}.custom-swatch:focus-within{outline:2px solid #52745a;outline-offset:3px}#custom-color{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;padding:0}
