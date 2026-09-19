@@ -37,3 +37,6 @@ header{right:38px;display:flex;align-items:center;justify-content:space-between;
 #open-color::before,#open-color::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;border-radius:1px;pointer-events:none}
 #open-color::before{width:10px;height:2px}
 #open-color::after{width:2px;height:10px}
+
+footer>a{pointer-events:auto;color:inherit;text-decoration:none}footer>a:hover{text-decoration:underline}#visit-link{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+

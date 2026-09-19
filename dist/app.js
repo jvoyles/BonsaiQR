@@ -1,11 +1,12 @@
+import { safeDestination, readSharedState } from './link-safety.js';
 import { buildBonsai } from './bonsai.js';
 import * as THREE from './vendor/three.module.js';
 import { buildSeasonWorld } from './worlds.js';
 const $=s=>document.querySelector(s), canvas=$('#tree'), hint=$('#hint'), input=$('#url');
 let season=0, blossom='#e8b0be', revealed=false, progress=0, qr, value='https://example.com/', timer;
-let sharedState=location.search;try{if(location.hash?.startsWith('#bonsai='))sharedState=decodeURIComponent(location.hash.slice(8));}catch{}const params=new URLSearchParams(sharedState);try{if(params.has('q')){const [color,tint,url]=JSON.parse(decodeURIComponent(atob(params.get('q').replace(/-/g,'+').replace(/_/g,'/'))));params.set('season',String(color));params.set('blossom',tint);params.set('url',url);}}catch{}let sceneMode='tree';let islandGroups=[]; if(params.has('url')){try{let u=new URL(params.get('url'));if(['https:','http:'].includes(u.protocol))value=u.href;}catch{}}if(['0','1','2','3','4'].includes(params.get('season')))season=Number(params.get('season'));if(/^#[0-9a-f]{6}$/i.test(params.get('blossom')||''))blossom=params.get('blossom');input.value=value;
+const params=readSharedState(location.search,location.hash||'');let sceneMode='tree';let islandGroups=[];if(params.has('url'))value=params.get('url');if(['0','1','2','3','4'].includes(params.get('season')))season=Number(params.get('season'));if(/^#[0-9a-f]{6}$/i.test(params.get('blossom')||''))blossom=params.get('blossom');input.value=value;
 let sharedView=false;try{sharedView=params.has('url')&&new URL(params.get('url')).href===value;}catch{}
-if(sharedView){document.body.classList.add('shared-view');$('#visitor-actions').hidden=false;$('#visit-link').href=value;$('#visit-link').title=value;}
+if(sharedView){document.body.classList.add('shared-view');$('#visitor-actions').hidden=false;$('#visit-link').href=value;$('#visit-link').title=value;$('#visit-link').textContent='↗ Visit '+new URL(value).hostname;}
 
 let bonsai;
 let renderer,scene,camera,root,foliage,trunk,ground,petals=[],matrixSize=25;
@@ -213,7 +214,7 @@ function toggle(){if(!renderer)return;revealed=!revealed;updateSceneLabels();}
 function setMode(mode){if(mode===sceneMode)return;sceneMode=mode;document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===sceneMode)));grow();updateSceneLabels();if(renderer)resize();}
 document.querySelectorAll('[data-mode]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.mode===sceneMode));b.onclick=()=>setMode(b.dataset.mode);});updateSceneLabels();
 $('#scene').onclick=toggle;hint.onclick=toggle;
-function update(){clearTimeout(timer);let next=input.value.trim();try{if(!/^https?:\/\//i.test(next))next='https://'+next;const u=new URL(next);if(!['https:','http:'].includes(u.protocol)||!u.hostname.includes('.'))throw Error();if(next.length>600){$('#error').textContent='Please use a link shorter than 600 characters.';return;}value=u.href;makeQR();grow();$('#error').textContent='';if(!renderer)$('#fallback').innerHTML=qr.createImgTag(7,28,'Your scannable QR code');}catch{$('#error').textContent='Enter a valid website address, like example.com.';}}
+function update(){clearTimeout(timer);let next=input.value.trim();try{if(!/^https?:\/\//i.test(next))next='https://'+next;const u=new URL(safeDestination(next));if(next.length>600){$('#error').textContent='Please use a link shorter than 600 characters.';return;}value=u.href;makeQR();grow();$('#error').textContent='';if(!renderer)$('#fallback').innerHTML=qr.createImgTag(7,28,'Your scannable QR code');}catch{$('#error').textContent='Enter a valid website address, like example.com.';}}
 input.oninput=()=>{clearTimeout(timer);timer=setTimeout(update,650);};$('#link-form').onsubmit=e=>{e.preventDefault();update();input.blur();};
 function setSeason(){document.querySelectorAll('[data-season]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.season)===season)));$('#swatches').hidden=false;$('#custom-color').value=season===4?blossom:$('#custom-color').value;$('.custom-swatch').classList.toggle('selected',season===4);document.querySelectorAll('[data-palette]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.palette)===season)));if(renderer)resize();}
 document.querySelectorAll('[data-season]').forEach(b=>b.onclick=()=>{season=Number(b.dataset.season);setSeason();grow();});document.querySelectorAll('[data-color]').forEach(b=>b.onclick=()=>{blossom=b.dataset.color;season=Number(b.dataset.palette||0);setSeason();grow();});setSeason();
@@ -230,9 +231,9 @@ document.addEventListener('pointerdown',e=>{if(!e.target.closest('#color-panel')
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeColorPanel();});
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),3000);}
 function bonsaiLink(){
- const u=new URL('https://magic-tree-jv.jvoyles255.chatgpt.site/');
+ const u=new URL('/',location.origin);
  const code=btoa(encodeURIComponent(JSON.stringify([season,blossom,value]))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
- u.searchParams.set('q',code);return u.href;
+ u.hash='bonsai='+encodeURIComponent(new URLSearchParams({q:code}).toString());return u.href;
 }
 function prepareShare(){if(input.value.trim()!==value)update();if($('#error').textContent)return null;const link=bonsaiLink();$('#bonsai-link').value=link;return link;}
 $('#share').onclick=e=>{e.stopPropagation();if(!$('#share-menu').hidden){$('#share-menu').hidden=true;return;}if(!prepareShare())return;$('#share-menu').hidden=false;$('#copy').innerHTML='<span aria-hidden="true">↗</span>Copy Link';$('#bonsai-link').hidden=true;};
