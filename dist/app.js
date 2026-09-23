@@ -13,7 +13,21 @@ let renderer,scene,camera,root,foliage,trunk,ground,petals=[],matrixSize=25;
 const palettes=[['#eab0bf','#e990b0','#f4c7d3','#d77599'],['#7da94a','#91bd55','#b6cf6d','#5c913a'],['#d28535','#e4a345','#a8532d','#c56332']];
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let seed=438;function random(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
-function disposeGroup(group){while(group.children.length){const o=group.children[0];group.remove(o);o.traverse(x=>{if(x.geometry)x.geometry.dispose();if(x.material){(Array.isArray(x.material)?x.material:[x.material]).forEach(m=>m.dispose());}});}}
+function disposeGroup(group){
+ // These descendants own their resources; deduplicate resources shared within them.
+ const geometries=new Set(),materials=new Set();
+ for(const child of [...group.children]){
+  child.traverse(object=>{
+   // Instance matrix/color buffers are released by the mesh's dispose event.
+   if(object.isInstancedMesh)object.dispose();
+   if(object.geometry)geometries.add(object.geometry);
+   if(object.material)for(const material of (Array.isArray(object.material)?object.material:[object.material]))materials.add(material);
+  });
+  group.remove(child);
+ }
+ for(const geometry of geometries)geometry.dispose();
+ for(const material of materials)material.dispose();
+}
 function makeQR(){qr=qrcode(0,'M');qr.addData(value);qr.make();matrixSize=qr.getModuleCount();}
 function leafGeometry(){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,.11,.025,.085,.26,0,0,.11,-.018,-.085],3));g.setIndex([0,1,2,0,2,3]);g.computeVertexNormals();return g;}
 function branch(a,b,r){const d=new THREE.Vector3().subVectors(b,a);const mesh=new THREE.Mesh(new THREE.CylinderGeometry(r*.6,r,d.length(),7),new THREE.MeshStandardMaterial({color:'#806040',roughness:1}));mesh.position.copy(a).addScaledVector(d,.5);mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());mesh.castShadow=true;trunk.add(mesh);}
