@@ -54,7 +54,7 @@ export function buildBonsai(qr,season,blossom){
   let height=-.2115;
   if(canopy){const peaks=[[-1.05,.25,1.85],[.95,.3,2.0],[-.72,-.72,2.45],[.65,-.8,2.55],[-.05,-.4,3.02]];let best=Infinity;for(const [px,pz,py]of peaks){const distance=Math.hypot(x-px,z-pz);if(distance<best){best=distance;height=py-Math.floor(distance/.24)*.065;}}}
   for(let a=0;a<3;a++)for(let b=0;b<3;b++){
-   const color=new THREE.Color(canopy?palette[Math.floor(random()*palette.length)]:season===3?'#99b2a5':['#5b9038','#79a744','#8b9846'][Math.floor(random()*3)]);
+   const color=new THREE.Color(canopy?palette[Math.floor(random()*palette.length)]:['#5b9038','#79a744','#8b9846'][Math.floor(random()*3)]);
    const scan=color.clone(),hsl={};scan.getHSL(hsl);scan.setHSL(hsl.h,Math.max(.25,hsl.s),Math.min(.10,hsl.l));
    pieces.push({canopy,x:x+(a-1)*unit/3,z:z+(b-1)*unit/3,y:height+(canopy?random()*.085:0),w:unit/3*1.003,h:canopy?.055:.022,color,scan});
   }
