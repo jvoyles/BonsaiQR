@@ -283,4 +283,4 @@ $('#download').onclick=()=>{
  }
  const a=document.createElement('a');a.download='BonsaiQR.png';a.href=c.toDataURL('image/png');a.click();$('#share-menu').hidden=true;toast('QR artwork downloaded');
 };
-$('#info').onclick=()=>$('#about').showModal();$('#close-about').onclick=()=>$('#about').close();document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#share-menu').hidden=true;});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#share-menu').hidden=true;});
